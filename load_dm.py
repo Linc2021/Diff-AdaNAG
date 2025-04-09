@@ -26,7 +26,7 @@ from utils import *
 
 
 def get_imagenet_dm_conf(class_cond=False, respace="", device='cuda',
-                         model_path='~/DiffPGD/ckpt/256x256_diffusion_uncond.pt'):
+                         model_path='./ckpt/256x256_diffusion_uncond.pt'):
 
     defaults = dict(
         clip_denoised=True,
