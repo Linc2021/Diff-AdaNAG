@@ -24,7 +24,7 @@ advertorch
 
 ## Preparation
 
-1. Download [[DM checkpoint]](https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt) and put it into `DiffPGD/ckpt/`
+1. Download [[DM checkpoint]](https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt) and put it into `ckpt/`
 
 2. Prepare imagenet dataset, and put it into `ILSVRC2012_img_val/`
 - The image set can be download from [[ILSVRC2012 validation]](https://image-net.org/challenges/LSVRC/2012/index.php)
