@@ -8,8 +8,18 @@ generalization capabilities of NAG in optimization, enhancing black-box transfer
 
 ## Dependencies
 ```
-python >= 3.11, torch, torchvision, torchaudio, numpy, scipy, torchattacks, matplotlib,
-tqdm, colorama, transformers robustbench@git+https://github.com/RobustBench/robustbench.git@v1.0, torchattacks, advertorch
+python >= 3.11
+torch, torchvision, torchaudio
+numpy
+scipy
+torchattacks
+matplotlib
+tqdm
+colorama
+transformers
+robustbench@git+https://github.com/RobustBench/robustbench.git@v1.0,
+torchattacks
+advertorch
 ```
 
 ## Preparation
