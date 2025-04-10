@@ -24,10 +24,10 @@ advertorch
 
 ## Preparation
 
-1. Download [[DM checkpoint]](https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt) and put it into `ckpt/`
+1. Download the [DM checkpoint](https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt) and put it into `ckpt/`
 
 2. Prepare imagenet dataset, and put it into `ILSVRC2012_img_val/`
-- The image set can be download from [[ILSVRC2012 validation]](https://image-net.org/challenges/LSVRC/2012/index.php)
+- The ImageNet validation dataset can be download from [ILSVRC2012](https://image-net.org/challenges/LSVRC/2012/index.php)
 - Use `valprep.sh` in `ILSVRC2012_img_val/` to preprocess the dataset.
 
 ## Example 
@@ -71,5 +71,12 @@ The all parameters for test_code_siditi.py:
 [N_EXAMPLES]:          number of samples used in attack (default: 500)
 [seed]:                random seed (default: 42)
 ```
+
+## Reference
+
+The code for adcversarial methods are inspired by [adversarial-attacks-pytorch](https://github.com/Harry24k/adversarial-attacks-pytorch).
+
+The code `load_dm.py` and code in `guided_diffusion/` are forked from [Diff-PGD](https://github.com/xavihart/Diff-PGD).
+
 
 
