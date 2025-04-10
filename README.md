@@ -15,11 +15,7 @@ scipy
 torchattacks
 matplotlib
 tqdm
-colorama
 transformers
-robustbench@git+https://github.com/RobustBench/robustbench.git@v1.0,
-torchattacks
-advertorch
 ```
 
 ## Preparation
