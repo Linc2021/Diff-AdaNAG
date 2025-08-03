@@ -130,7 +130,7 @@ if __name__ == "__main__":
                     torch.cuda.empty_cache()
 
                     atk6 = SINIFGSM(base_model, eps=4/255, alpha=4/255/nstep, steps=nstep)
-                    success_rate6, losses6 = report_success_rate(atk7, target_model, testloader, device, nstep)
+                    success_rate6, losses6 = report_success_rate(atk6, target_model, testloader, device, nstep)
                     del atk6
                     torch.cuda.empty_cache()
 
