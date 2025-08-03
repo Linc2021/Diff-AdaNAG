@@ -158,7 +158,7 @@ if __name__ == "__main__":
                     print('diff_PGD Success rate: {:.2f}%\n'.format(success_rate3[-1]))
                     print('AdaMSI-FGM Success rate: {:.2f}%'.format(success_rate4[-1]))
                     print('NI-FGSM Success rate: {:.2f}%'.format(success_rate5[-1]))
-                    print('SI-NI-FGSM Success rate: {:.2f}%'.format(success_rate5[-1]))
+                    print('SI-NI-FGSM Success rate: {:.2f}%'.format(success_rate6[-1]))
 
                     with open(f'log_{respace}_{t}_nstep{nstep}_{file}.txt', 'a') as f:
                         f.write("\noriginal={}, target={}\n".format(original_name, target_name))
