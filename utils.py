@@ -43,7 +43,7 @@ def load_target_model(model, device):
     return target_model
 
 
-def report_success_rate(atk, target_model, device, nstep=1):
+def report_success_rate(atk, target_model, testloader, device, nstep=1):
     """
     Compute the success rate of the provided attack on test images
     """
