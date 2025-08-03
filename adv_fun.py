@@ -817,7 +817,7 @@ class diff_AdaNAG(Attack):
         # adv_images = images_diff.clone().detach()
         # z_t = images_diff.clone().detach()
 
-        for i in range(self.steps):
+        for j in range(self.steps):
 
             yt = (1 - theta) * adv_images + theta * z_t
 
@@ -876,7 +876,7 @@ class diff_AdaNAG(Attack):
             V_t_hat = torch.sqrt(V_t) #+ self.delta
 
             # 1
-            eta_t = self.eta / (i + 2)
+            eta_t = self.eta / (j + 2)
 
             
             z_t = z_t + eta_t * torch.div(grad, theta * V_t_hat)
