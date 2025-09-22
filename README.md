@@ -30,7 +30,8 @@ timm
 ## Example 
 Compare with orther attack method:
 ```
-python test_code.py -n 20 -d cuda:0
+python test_code.py -n 20 -d cuda:0 --save_adv_images
+python additional_test_code.py -n 20 -d cuda:0 --save_adv_images
 ```
 The all parameters for test_code.py:
 ```
@@ -45,11 +46,13 @@ The all parameters for test_code.py:
 [N_WORKERS]:            num_workers for DataLoader (default: 4)
 [N_EXAMPLES]:           number of samples used in attack (default: 500)
 [seed]:                 random seed (default: 42)
+[save_adv_images]       save adversarial images (default: False)
+[save_dir]              directory to save adversarial images (default: './adv_images')
 ```
 
 Compare with i-FGSM with different mechanisms (DI, SI and TI)
 ```
-python test_code_siditi.py -n 20 -d cuda:0 --SI
+python test_code_siditi.py -n 20 -d cuda:0 --SI --save_adv_images
 ```
 The all parameters for test_code_siditi.py:
 ```
@@ -67,7 +70,10 @@ The all parameters for test_code_siditi.py:
 [N_WORKERS]:           num_workers for DataLoader (default: 4)
 [N_EXAMPLES]:          number of samples used in attack (default: 500)
 [seed]:                random seed (default: 42)
+[save_adv_images]       save adversarial images (default: False)
+[save_dir]              directory to save adversarial images (default: './adv_images')
 ```
+
 
 ## Reference
 
