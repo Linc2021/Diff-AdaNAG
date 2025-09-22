@@ -16,6 +16,7 @@ torchattacks
 matplotlib
 tqdm
 transformers
+timm
 ```
 
 ## Preparation
