@@ -1,11 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+import os
+import timm
+from typing import List, Union, Dict, Callable
 
 import torch
 import torchvision
 import torchvision.datasets as dsets
 import torchvision.transforms as transforms
+import torch.nn as nn
 from tqdm import tqdm
 
 
@@ -21,8 +25,11 @@ def add_normalization_layer(model, mean, std):
         model
     )
 # Load the original model, the pretrained resnet18 model provided by torchvision.
-def load_original_model(model, device):
-    base_model = model(pretrained=True)
+def load_original_model(model: Union[str, Callable[[], nn.Module]], device):
+    if callable(model):
+        base_model = model(pretrained=True)
+    elif isinstance(model, str):
+        base_model = timm.create_model(model, pretrained=True)
     base_model = add_normalization_layer(model=base_model,
                                          mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
@@ -32,8 +39,11 @@ def load_original_model(model, device):
     return base_model
 
 # load the target model, the pretrained resnet50 model provided by torchvision.
-def load_target_model(model, device):
-    target_model = model(pretrained=True)
+def load_target_model(model: Union[str, Callable[[], nn.Module]], device):
+    if callable(model):
+        target_model = model(pretrained=True)
+    elif isinstance(model, str):
+        target_model = timm.create_model(model, pretrained=True)
     target_model = add_normalization_layer(model=target_model,
                                            mean=[0.485, 0.456, 0.406],
                                            std=[0.229, 0.224, 0.225])
@@ -43,26 +53,83 @@ def load_target_model(model, device):
     return target_model
 
 
-def report_success_rate(atk, target_model, testloader, device, nstep=1):
+# def report_success_rate(atk, target_model, testloader, device, nstep=1):
+#     """
+#     Compute the success rate of the provided attack on test images
+#     """
+#     correct = np.zeros(nstep)
+#     total = np.zeros(nstep)
+#     for images, labels in tqdm(testloader, total=len(testloader)):
+#         images = images.to(device)
+#         labels = labels.to(device)
+#         adv_images, losses = atk(images, labels)
+
+#         for i in range(len(adv_images)):
+#             with torch.no_grad():
+#                 outputs_adv = target_model(adv_images[i])
+#                 _, predicted_adv = torch.max(outputs_adv.data, 1)
+#             total[i] += labels.size(0)
+#             correct[i] += (predicted_adv == labels).sum().item()
+#     success_rates = 100 - 100 * (correct / total)
+#     return success_rates.tolist(), losses
+
+def report_success_rate(atk, target_models, testloader, device, nstep=1, save_adv_images=False, save_dir=None, N_EXAMPLES = 500):
     """
     Compute the success rate of the provided attack on test images
+    If target_models is a dictionary, test against multiple target models and return results for all
+    If target_models is a single model, test against that model and return results
+    If save_adv_images is True, save the generated adversarial images to save_dir
     """
-    correct = np.zeros(nstep)
-    total = np.zeros(nstep)
-    for images, labels in tqdm(testloader, total=len(testloader)):
-        images = images.to(device)
-        labels = labels.to(device)
-        adv_images, losses = atk(images, labels)
+    if isinstance(target_models, dict):
+        # Test against multiple target models
+        results = {}
+        
+        # Generate adversarial examples once
+        img_idx = 0
+        for images, labels in tqdm(testloader, total=len(testloader)):
+            images = images.to(device)
+            labels = labels.to(device)
+            adv_images, losses = atk(images, labels)
+            
+            # Save adversarial images if requested (only final step images, each batch item separately)
+            if save_adv_images and save_dir is not None:
+                os.makedirs(save_dir, exist_ok=True)
+                # Get the final step adversarial images (last element in the list)
+                if isinstance(adv_images, list) and len(adv_images) > 0:
+                    final_adv_images = adv_images[-1]  # Tensor of shape [batch_size, C, H, W]
+                    if torch.is_tensor(final_adv_images):
+                        # Save each image in the batch separately
+                        for batch_idx in range(final_adv_images.shape[0]):
+                            save_path = os.path.join(save_dir, f"{str(img_idx + batch_idx).rjust(3, '0')}_adv_img.png")
+                            torchvision.utils.save_image(final_adv_images[batch_idx], save_path)
+                            save_path = os.path.join(save_dir, f"{str(img_idx + batch_idx).rjust(3, '0')}_clean_img.png")
+                            torchvision.utils.save_image(images[batch_idx], save_path)
+                img_idx += images.shape[0]  # Increment by batch size
+            
+            # Test each target model with the same adversarial examples
+            # for model_name, model in target_models.items():
+            for model_name, target_model in target_models.items():
+                if model_name not in results:
+                    results[model_name] = {'correct': np.zeros(nstep), 'total': np.zeros(nstep)}
+                    # target_model = load_target_model(model, device)
+                
+                for i in range(len(adv_images)):
+                    with torch.no_grad():
+                        outputs_adv = target_model(adv_images[i])
+                        _, predicted_adv = torch.max(outputs_adv.data, 1)
+                    results[model_name]['total'][i] += labels.size(0)
+                    results[model_name]['correct'][i] += (predicted_adv == labels).sum().item()
+        
+        
+        # Calculate success rates for all target models
+        success_rates_dict = {}
+        for model_name, result in results.items():
+            success_rates = 100 - 100 * (result['correct'] / result['total'])
+            success_rates_dict[model_name] = success_rates.tolist()
+            
+        return success_rates_dict, losses
 
-        for i in range(len(adv_images)):
-            with torch.no_grad():
-                outputs_adv = target_model(adv_images[i])
-                _, predicted_adv = torch.max(outputs_adv.data, 1)
-            total[i] += labels.size(0)
-            correct[i] += (predicted_adv == labels).sum().item()
-    success_rates = 100 - 100 * (correct / total)
-    return success_rates.tolist(), losses
-
+    
 def get_imagenet_data():
     MEAN = [0.485, 0.456, 0.406]
     STD = [0.229, 0.224, 0.225]
