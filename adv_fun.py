@@ -1,4 +1,3 @@
-#添加路径
 import sys
 import torch
 import torch.nn as nn
@@ -11,7 +10,6 @@ import math
 from load_dm import get_imagenet_dm_conf
 import warnings
 
-# 忽略所有的 UserWarning 和 FutureWarning
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -445,7 +443,7 @@ class diff_PGD(Attack):
 
     """
 
-    def __init__(self, model, eps=8 / 255, alpha=2 / 255, steps=10, random_start=True, respace = 'ddim50',t = 1):
+    def __init__(self, model, eps=8 / 255, alpha=2 / 255, steps=10, random_start=True, respace = 'ddim50',t = 1, denoised=False):
         super().__init__("diff_PGD", model)
         self.eps = eps
         self.alpha = alpha
@@ -455,6 +453,7 @@ class diff_PGD(Attack):
         self.t = t
         self.diffmodel, self.diffusion = get_imagenet_dm_conf(device=self.device, respace=respace)
         self.net = SDEdit(self.diffusion, self.diffmodel, t=self.t)
+        self.denoised = denoised
 
     def forward(self, images, labels):
         r"""
@@ -506,8 +505,10 @@ class diff_PGD(Attack):
             all_images.append(adv_images)
         
         
-        # with torch.no_grad():
-        #     pred_x0 = self.net.sdedit(adv_images, self.t)
+        if self.denoised:
+            with torch.no_grad():
+                pred_x0 = self.net.sdedit(adv_images, self.t)
+            return all_images, losses, pred_x0
         
         return all_images, losses
 
@@ -708,7 +709,7 @@ class diff_AdaNAG(Attack):
                  delta=1e-16, SI = False, m = 5,
                  diversity=False, resize_rate=0.9, diversity_prob=0.5,
                  TI=False, kernel_name='gaussian', len_kernel=15, nsig=3,
-                 respace = 'ddim50',t = 1):
+                 respace = 'ddim50',t = 1, denoised =False):
         super().__init__("diff_AdaNAG_v1", model)
         self.eps = eps
         # self.alpha = alpha
@@ -730,6 +731,7 @@ class diff_AdaNAG(Attack):
         self.diffmodel, self.diffusion = get_imagenet_dm_conf(device=self.device, respace=respace)
         self.net = SDEdit(self.diffusion, self.diffmodel, t=self.t)
         self.m = m
+        self.denoised = denoised
         
 
     def input_diversity(self, x):
@@ -893,10 +895,11 @@ class diff_AdaNAG(Attack):
 
             # l_inf_norm = torch.norm(adv_images - images, p=float('inf'))
             # print(f"L∞ 范数: {l_inf_norm.item()}")
-            
 
-        # with torch.no_grad():
-        #     pred_x0 = self.net.sdedit(adv_images, self.t)
+        if self.denoised:
+            with torch.no_grad():
+                pred_x0 = self.net.sdedit(adv_images, self.t)
+            return all_images, losses, pred_x0
         return all_images, losses
 
 
